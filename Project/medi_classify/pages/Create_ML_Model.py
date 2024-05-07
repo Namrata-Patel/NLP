@@ -2,6 +2,7 @@ import streamlit as st
 from sklearn.svm import SVC
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score
 import joblib
 
 from utils.utils import *
@@ -74,8 +75,20 @@ with tabs[2]:
 
     if button:
         with st.spinner('Wait for it...'):
-            accuracy_score=get_score(st.session_state['svm_classifier'],st.session_state['sentences_test'],st.session_state['labels_test'])
-            st.success(f"Validation accuracy is {100*accuracy_score}%!")
+            y_pred = st.session_state['svm_classifier'].predict(st.session_state['sentences_test'])
+            accuracy_score_val = accuracy_score(st.session_state['labels_test'], y_pred)
+            precision_val = precision_score(st.session_state['labels_test'], y_pred, average='weighted')
+            recall_val = recall_score(st.session_state['labels_test'], y_pred, average='weighted')
+            f1_val = f1_score(st.session_state['labels_test'], y_pred, average='weighted')
+
+            st.success(f"Validation accuracy of svm_classifier : {100*accuracy_score_val:.2f}%")
+            st.write(f"Precision: {precision_val}")
+            st.write(f"Recall: {recall_val}")
+            st.write(f"F1 Score: {f1_val}")
+
+            # st.write("Confusion Matrix:")
+            # cm = confusion_matrix(st.session_state['labels_test'], y_pred)
+            # st.write(cm)
 
 
             st.write("A sample run:")
@@ -107,3 +120,4 @@ with tabs[3]:
         with st.spinner('Wait for it...'):
              joblib.dump(st.session_state['svm_classifier'], 'modelsvm.pk1')
         st.success('Done!')
+
